@@ -390,3 +390,79 @@ body {
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+/* ===== MAP D3 SPECIFIC ===== */
+body.light {
+  --map-water: #d4e8f5;
+  --map-land: #e8eed8;
+  --map-india: #f5d76e;
+  --map-india-border: #b8860b;
+  --map-border: #b0b8c8;
+  --map-graticule: #a0b0c0;
+}
+body.dark {
+  --map-water: #0f2035;
+  --map-land: #2a3828;
+  --map-india: #c8980a;
+  --map-india-border: #f0c030;
+  --map-border: #3a4a5a;
+  --map-graticule: #2a3a4a;
+}
+body.weather-sunny {
+  --map-water: #b8d8f0; --map-land: #e0eac0;
+  --map-india: #f0c040; --map-india-border: #a07000;
+  --map-border: #c0b880; --map-graticule: #c0c080;
+}
+body.weather-rainy {
+  --map-water: #8ab0d0; --map-land: #c0ccb0;
+  --map-india: #d0a820; --map-india-border: #806000;
+  --map-border: #8090a8; --map-graticule: #7080a0;
+}
+body.weather-cloudy {
+  --map-water: #a0b8cc; --map-land: #c8d4b8;
+  --map-india: #c8a820; --map-india-border: #706010;
+  --map-border: #909aa8; --map-graticule: #8090a0;
+}
+
+.map-container {
+  position: relative;
+  background: var(--map-water);
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border);
+  overflow: hidden;
+  min-height: 320px;
+}
+
+.world-map-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  cursor: crosshair;
+}
+
+.map-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: var(--text3);
+  background: var(--map-water);
+  z-index: 2;
+}
+
+/* India states hover */
+.india-state:hover {
+  filter: brightness(1.12);
+  cursor: pointer;
+}
+.country:hover {
+  filter: brightness(1.08);
+  cursor: pointer;
+}
+
+/* Marker dot overrides for legend */
+.legend-dot.supplier-dot  { background: #2563eb; }
+.legend-dot.recipient-dot { background: #d97706; }
+.legend-dot.tw-dot        { background: rgba(16,185,129,0.7); border: 1px solid rgba(16,185,129,1); }

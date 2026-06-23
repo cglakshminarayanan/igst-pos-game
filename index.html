@@ -7,13 +7,14 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Product+Sans:wght@400;700&display=swap" rel="stylesheet"/>
-<!-- Fallback if Product Sans is blocked -->
 <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="style.css"/>
+<!-- D3 + TopoJSON for accurate world map -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
 </head>
 <body class="light">
 
-<!-- THEME TOGGLE -->
 <div class="topbar">
   <div class="logo-area">
     <span class="logo-icon">⚖️</span>
@@ -28,35 +29,30 @@
     <div class="theme-toggle" id="themeToggle">
       <button class="theme-btn active" data-theme="light" title="Light mode">☀️</button>
       <button class="theme-btn" data-theme="dark" title="Dark mode">🌙</button>
-      <button class="theme-btn" data-theme="weather" title="Weather-based theme" id="weatherBtn">🌤️</button>
+      <button class="theme-btn" data-theme="weather" title="Weather-based theme">🌤️</button>
     </div>
   </div>
 </div>
 
-<!-- WEATHER STATUS BAR -->
 <div class="weather-bar" id="weatherBar" style="display:none">
   <span id="weatherText">Detecting weather…</span>
 </div>
 
-<!-- MAIN CONTENT -->
 <main class="main-container">
-
-  <!-- HERO -->
   <section class="hero">
     <div class="hero-inner">
       <h1 class="hero-title">Where is the Place of Supply?</h1>
-      <p class="hero-sub">Master IGST Sections 9–13 through interactive scenarios. Search a transaction type, pick locations, and find the correct place of supply.</p>
+      <p class="hero-sub">Master IGST Sections 9–13 through interactive scenarios. Search a transaction type, pick locations on the world map, and find the correct place of supply.</p>
       <div class="score-bar">
         <div class="score-item"><span class="score-num" id="scoreCorrect">0</span><span class="score-lbl">Correct</span></div>
         <div class="score-sep"></div>
         <div class="score-item"><span class="score-num" id="scoreWrong">0</span><span class="score-lbl">Wrong</span></div>
         <div class="score-sep"></div>
-        <div class="score-item"><span class="score-num" id="scoreStreak">0🔥</span><span class="score-lbl">Streak</span></div>
+        <div class="score-item"><span class="score-num" id="scoreStreak">0</span><span class="score-lbl">Streak 🔥</span></div>
       </div>
     </div>
   </section>
 
-  <!-- STEP 1: SEARCH SCENARIO -->
   <section class="card step-card" id="step1">
     <div class="step-badge">Step 1</div>
     <h2 class="step-title">Choose a Supply Scenario</h2>
@@ -69,12 +65,10 @@
     <div id="selectedScenario" class="selected-scenario hidden"></div>
   </section>
 
-  <!-- STEP 2: SELECT LOCATIONS -->
   <section class="card step-card hidden" id="step2">
     <div class="step-badge">Step 2</div>
-    <h2 class="step-title">Set Supplier & Recipient Locations</h2>
-    <p class="step-desc">Type or click on the map to set locations. <span class="map-tip">💡 Clicking in Indian territorial waters → Section 9 applies.</span></p>
-
+    <h2 class="step-title">Set Supplier &amp; Recipient Locations</h2>
+    <p class="step-desc">Type below or click directly on the map. <span class="map-tip">💡 Clicking the sea near India's coast → Section 9 (Territorial Waters).</span></p>
     <div class="locations-grid">
       <div class="loc-block">
         <label class="loc-label">📤 Location of Supplier</label>
@@ -95,24 +89,21 @@
         <div id="recipientSelected" class="loc-selected hidden"></div>
       </div>
     </div>
-
-    <!-- MAP -->
     <div class="map-section">
-      <div class="map-label">Click on map to set location <span id="mapClickTarget" class="map-click-target">(next: Supplier)</span></div>
+      <div class="map-label">Click on map to set location — <span id="mapClickTarget" class="map-click-target">next: Supplier</span></div>
       <div class="map-container" id="mapContainer">
-        <svg id="worldMap" viewBox="0 0 1000 500" xmlns="http://www.w3.org/2000/svg" class="world-map-svg"></svg>
+        <div id="mapLoading" class="map-loading">Loading world map…</div>
+        <svg id="worldMap" class="world-map-svg" style="display:none"></svg>
         <div class="map-legend">
-          <span class="legend-item"><span class="legend-dot supplier"></span>Supplier</span>
-          <span class="legend-item"><span class="legend-dot recipient"></span>Recipient</span>
-          <span class="legend-item"><span class="legend-dot territorial-waters"></span>Territorial Waters (Sec 9)</span>
+          <span class="legend-item"><span class="legend-dot supplier-dot"></span>Supplier</span>
+          <span class="legend-item"><span class="legend-dot recipient-dot"></span>Recipient</span>
+          <span class="legend-item"><span class="legend-dot tw-dot"></span>Territorial Waters (Sec 9)</span>
         </div>
       </div>
     </div>
-
     <button class="btn btn-primary" id="proceedToStep3" disabled>Proceed to Question →</button>
   </section>
 
-  <!-- STEP 3: SELECT PLACE OF SUPPLY -->
   <section class="card step-card hidden" id="step3">
     <div class="step-badge">Step 3</div>
     <h2 class="step-title">What is the Place of Supply?</h2>
@@ -123,21 +114,18 @@
       <button class="btn btn-secondary" id="tryAnotherBtn">Try Another Scenario</button>
     </div>
   </section>
-
 </main>
 
-<!-- WRONG ANSWER POPUP -->
 <div id="wrongPopup" class="popup-overlay hidden">
   <div class="popup-box">
     <button class="popup-close" id="closeWrongPopup">✕</button>
     <div class="popup-icon">❌</div>
     <h3 class="popup-title">Not quite right!</h3>
     <p class="popup-msg" id="wrongPopupMsg">That's not the correct place of supply for this scenario.</p>
-    <button class="btn btn-outline" id="showAnswerBtn">Show the Correct Answer & Explanation</button>
+    <button class="btn btn-outline" id="showAnswerBtn">Show the Correct Answer &amp; Explanation</button>
   </div>
 </div>
 
-<!-- CORRECT ANSWER POPUP -->
 <div id="correctPopup" class="popup-overlay hidden">
   <div class="popup-box correct">
     <div class="popup-icon">🎉</div>
